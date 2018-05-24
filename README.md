@@ -33,4 +33,4 @@ We can only make the code available here. But if you'd like to know where we got
   * Delays
   * Cancellations
   
-![weather sample](/2_video/final_vids_long/1_weather/weather_AT_VZ_wind_long.webm)
+![weather sample](/3_video/final_vids_long/1_weather/weather_AT_VZ_wind_long.webm)
