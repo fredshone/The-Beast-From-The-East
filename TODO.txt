@@ -1,0 +1,39 @@
+Reduce Git Repo
+Commit
+Add SM work to Repo
+Invite SM and Cp to collaborate
+Add README with links to website and data
+
+Create G Drive directory
+Add data to G Drive
+
+Intro
+	Intro
+	Brief
+	Structure
+Visualisation
+	Website
+	Plotly
+	Videos
+	D3
+Data Methodologies
+	Intro
+	Processing
+	Output
+Conclusion
+Appendices - who did what
+
+# Three methodologies are available: Point, IDW and (auto)kriging
+
+Add figure with high level workflow ie Data Processing - Visualisation - Narrative
+	processing = source and pipeline
+	visualisation = Plotly, D3 and video
+	narrative = website
+Add section on video editing and render
+Add figure for data layering
+Add figures for data processing
+Add video screen shots
+
+Add Git links to report
+Add G Drive links too report
+

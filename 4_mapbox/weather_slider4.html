@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>Display a map</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.42.2/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.42.2/mapbox-gl.css' rel='stylesheet' />
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <link rel="stylesheet" href="assets/jqwidgets/styles/jqx.base.css" type="text/css" />
+    <link rel="stylesheet" href="assets/jqwidgets/styles/jqx.light.css" type="text/css" />
+    <link rel="stylesheet" href="assets/styles/demos.css" type="text/css" />
+    <script type="text/javascript" src="assets/scripts/webcomponents-lite.min.js"></script>
+    <script type="text/javascript" src="assets/jqwidgets/jqxcore.js"></script>
+    <script type="text/javascript" src="assets/jqwidgets/jqxcore.elements.js"></script>
+    <script type="text/javascript" src="assets/jqwidgets/jqxbuttons.js"></script>
+    <script type="text/javascript" src="assets/jqwidgets/jqxslider.js"></script>
+    <script type="text/javascript" src="assets/jqwidgets/jqxcheckbox.js"></script>
+    <script type="text/javascript" src="assets/scripts/demos.js"></script>
+    <script>
+        JQXElements.settings["sliderSettings"] =
+        {
+          template: "danger",
+          tooltip: false,
+          mode: 'fixed',
+			    buttonsPosition:"both",
+          theme:"light",
+          width: '100%',
+          min: 0,
+          //max: 1247,
+          max: 71,
+          height: 0,
+          value: 0,
+          //ticksFrequency: 96,
+          ticksFrequency: 8,
+          showMinorTicks: true,
+          //minorTicksFrequency: 4,
+          //minorTicksFrequency: 1,
+          showTickLabels: true
+        }
+
+        $(document).ready(function () {
+            // Create jqxCheckBox
+            $("#visibilityCheckBox").jqxCheckBox({ width: 120, height: 25});
+            $("#windCheckBox").jqxCheckBox({ width: 120, height: 25});
+          });
+    </script>
+
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
+
+  <style>
+
+.map-overlay {
+    font: 8px/10px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    position: absolute;
+    width: 100%;
+    top: 0;
+    left: 0;
+    padding: 10px;
+}
+
+.map-overlay .map-overlay-inner {
+  width: 74%;
+  float: left;
+  height: 100%;
+  padding: 10px;
+    background-color: #fff;
+    box-shadow:0 1px 2px rgba(0, 0, 0, 0.20);
+    border-radius: 3px;
+    padding: 10px;
+    margin-bottom: 10px;
+    margin: auto;
+}
+
+.map-overlay .map-overlay-inner2 {
+  width: 23%;
+  float: right;
+  height: 100%;
+  padding: 10px;
+    background-color: #fff;
+    box-shadow:0 1px 2px rgba(0, 0, 0, 0.20);
+    border-radius: 3px;
+    padding: 10px;
+    margin-bottom: 10px;
+    margin: auto;
+}
+
+.map-overlay h2 {
+    line-height: 8px;
+    display: block;
+    margin: 0 0 10px;
+}
+
+.map-overlay .legend .bar {
+    height: 10px;
+    width: 100%;
+    background: linear-gradient(to right, #FCA107, #7F3121);
+}
+
+.map-overlay input {
+    background-color: transparent;
+    display: inline-block;
+    width: 100%;
+    position: relative;
+    margin: 0;
+    cursor: ew-resize;
+}
+
+#timestampDay {
+  font: 12px/14px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  line-height: 1px;
+}
+#timestampHour {
+  font: 12px/14px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  line-height: 1px;
+}
+
+</style>
+
+
+<!-- Wrapper -->
+  <div id="wrapper" class="divided">
+
+    <!-- One -->
+    <section class="banner style1 orient-left content-align-left image-position-right fullscreen onload-image-fade-in onload-content-fade-right">
+      <div class="content">
+        <h2>The Beast From The East</h2>
+        <p class="major">Visualising Adverse Weather and Disruption to the UK</a>.</p>
+        <ul class="actions vertical">
+          <li><a href="#first" class="button big wide smooth-scroll-middle">Weather</a></li>
+          <li><a href="#first" class="button big wide smooth-scroll-middle">Social</a></li>
+          <li><a href="#first" class="button big wide smooth-scroll-middle">Roads</a></li>
+          <li><a href="#first" class="button big wide smooth-scroll-middle">Commerce</a></li>
+          <li><a href="#first" class="button big wide smooth-scroll-middle">Rail</a></li>
+        </ul>
+      </div>
+      <div class="image">
+        <div id='map'></div>
+        <div class='map-overlay top'>
+          <div class='map-overlay-inner'>
+            <!--<h2>Significant earthquakes in 2015</h2>-->
+            <label id='timestampDay'></label>
+            <label id='timestampHour'></label>
+            <jqx-slider settings="sliderSettings"></jqx-slider>
+          </div>
+          <div class='map-overlay-inner2'>
+            <div id='visibilityCheckBox' style='margin-left: 10px; float: left;'>
+                Show Visibility</div>
+                <div id='windCheckBox' style='margin-left: 10px; float: left;'>
+                Show Wind</div>
+            </div>
+        </div>
+      </div>
+  </section>
+
+</div>
+
+<script>
+  mapboxgl.accessToken = 'pk.eyJ1IjoiZnJlZHNob25lMSIsImEiOiJjamM4emhvYTIwN2xtMnFxeXJuOGZudWcxIn0.O3uvEhBXxfpvDy5yWFs5ng'; // Put your Mapbox Public Access token here
+
+  // Set bounds to Europe
+  var bounds = [
+  [-12, 48], // Southwest coordinates
+  [6, 59]  // Northeast coordinates
+  ];
+
+  // Load a new map in the 'map' HTML div
+  var map = new mapboxgl.Map({
+  container: 'map', // container id
+  style: 'mapbox://styles/fredshone1/cjgp3fzli00092ro4g89vgxmh', // stylesheet location
+  center: [-0.1, 51.5], // starting position [lng, lat]
+  zoom: 4, // starting zoom
+  maxBounds: bounds // Sets bounds as max
+  });
+
+  function mmod(n, m) {
+  return (((n % m) + m) % m);
+  }
+
+  ///////////////////////////////////////////////
+  // Define function that adds layers
+  function setImage(frameCounter) {
+    console.log("Set Image for frame: " + frameCounter);
+
+    tempCount = mmod(frameCounter,frameCount);
+    //map.setPaintProperty(('visibilityLayer' + tempCount), 'raster-opacity', 0.4);
+    map.setPaintProperty(('airTempLayer' + tempCount), 'raster-opacity', 1);
+    map.setPaintProperty(('avgSpeedLayer' + tempCount), 'raster-opacity', 1);
+    map.setPaintProperty(('snowDepthLayer' + tempCount), 'raster-opacity', 1);
+    //map.setPaintProperty(('windLayer' + tempCount), 'raster-opacity', 1);
+
+    tempCount = mmod(frameCounter-1,frameCount);
+    //map.setPaintProperty(('visibilityLayer' + tempCount), 'raster-opacity', 0.2);
+    map.setPaintProperty(('airTempLayer' + tempCount), 'raster-opacity', 0.6);
+    map.setPaintProperty(('avgSpeedLayer' + tempCount), 'raster-opacity', 0.5);
+    map.setPaintProperty(('snowDepthLayer' + tempCount), 'raster-opacity', 0.6);
+    //map.setPaintProperty(('windLayer' + tempCount), 'raster-opacity', 0);
+
+    tempCount = mmod(frameCounter-2,frameCount);
+    //map.setPaintProperty(('visibilityLayer' + tempCount), 'raster-opacity', 0.1)
+    map.setPaintProperty(('airTempLayer' + tempCount), 'raster-opacity', 0.3);
+    map.setPaintProperty(('avgSpeedLayer' + tempCount), 'raster-opacity', 0);
+    map.setPaintProperty(('snowDepthLayer' + tempCount), 'raster-opacity', 0.3);
+    //map.setPaintProperty(('windLayer' + tempCount), 'raster-opacity', 0);
+
+    tempCount = mmod(frameCounter-3,frameCount);
+    //map.setPaintProperty(('visibilityLayer' + tempCount), 'raster-opacity', 0)
+    map.setPaintProperty(('airTempLayer' + tempCount), 'raster-opacity', 0);
+    map.setPaintProperty(('avgSpeedLayer' + tempCount), 'raster-opacity', 0);
+    map.setPaintProperty(('snowDepthLayer' + tempCount), 'raster-opacity', 0);
+    //map.setPaintProperty(('windLayer' + tempCount), 'raster-opacity', 0);
+    // Set the label to the month
+    document.getElementById('timestampDay').textContent = timeStampArrayDays[frameCounter];
+    document.getElementById('timestampHour').textContent = timeStampArrayHours[frameCounter];
+  }
+
+  function clearImage(frameCounter) {
+
+    // Set all other layers to transparent
+    for (var frameClearer = 0; frameClearer < frameCount; frameClearer++) {
+
+      //map.setPaintProperty(('visibilityLayer' + frameClearer), 'raster-opacity', 0);
+      map.setPaintProperty(('airTempLayer' + frameClearer), 'raster-opacity', 0);
+      map.setPaintProperty(('avgSpeedLayer' + frameClearer), 'raster-opacity', 0);
+      map.setPaintProperty(('snowDepthLayer' + frameClearer), 'raster-opacity', 0);
+      //map.setPaintProperty(('windLayer' + frameClearer), 'raster-opacity', 0);
+    }
+  }
+
+///////////////////////////////////////////////
+// Set up timestamps
+daysArray = ["2018-02-26","2018-02-27","2018-02-28","2018-03-01","2018-03-02",
+            "2018-03-03","2018-03-04","2018-03-05","2018-03-06"];  // Days
+var days = daysArray.length;
+
+daysArrayClean = ["Monday, 26th of February","Tuesday, 27th of February","Wednesday, 28th of February",
+                  "Thursday, 1st of March","Friday, 2nd of March","Saturday, 3rd of March","Sunday, 4th of March",
+                  "Monday, 5th of March","Tuesday, 6th of March"];  // Days
+
+// var hoursArray = ["00", "01", "02", "03", "04", "05",
+//                 "06", "07", "08", "09", "10", "11",
+//                 "12", "13", "14", "15", "16", "17",
+//                 "18", "19", "20", "21", "22", "23"];  // Hours
+var hoursArray = ["00", "03",
+                "06", "09",
+                "12", "15",
+                "18", "21",];  // Hours
+var hours = hoursArray.length;
+
+var minsArray = ["00"];  // Minutes
+//var minsArray = ["00", "15", "30", "45"];  // Minutes
+var mins = minsArray.length;
+
+///////////////////////////////////////////////
+// Loop through days, hours and minutes creating timestamp array
+var timeStampArray = [];
+var timeStampArrayDays = [];
+var timeStampArrayHours = [];
+for (var day = 0; day < days; day++) {
+  for (var hour = 0; hour < hours; hour++) {
+    for (var min = 0; min < mins; min++) {
+      var timeStamp = daysArray[day] + "_" + hoursArray[hour] + "-" + minsArray[min] + "-00";
+      var timeStampDays = daysArrayClean[day];
+      var timeStampHours = hoursArray[hour] + ":" + minsArray[min] + ":00";
+      timeStampArray.push(timeStamp);
+      timeStampArrayDays.push(timeStampDays);
+      timeStampArrayHours.push(timeStampHours);
+  }}}
+
+///////////////////////////////////////////////
+// After map load loop through mapbox layers to find id of label layer
+map.on('load', function() {
+
+var layers = map.getStyle().layers;
+// Find the index of the first symbol layer in the map style
+var firstSymbolId;
+for (var i = 0; i < layers.length; i++) {
+  if (layers[i].type === 'symbol') {
+      firstSymbolId = layers[i].id;
+      break;
+  }
+}
+
+///////////////////////////////////////////////
+// Loop through days, hours and minutes loading layers
+var frameCountLoader = 0;
+
+for (var day = 0; day < days; day++) {
+  for (var hour = 0; hour < hours; hour++) {
+    for (var min = 0; min < mins; min++) {
+      // Keep track of all frames
+      var frameCountLoader = (day * (hours * mins)) + (hour * mins) + min;
+      frameCount = days * hours * mins;
+      // Create time stamp paths
+      var timeStamp = daysArray[day] + "_" + hoursArray[hour] + "-" + minsArray[min] + "-00";
+      var pathWind = "wind/wind_" + timeStamp + ".png";
+      var pathAirTemp = "air_temp_trans/air_temp_trans" + timeStamp + ".png";
+      var pathVisbility = "visibility/weather2_" + timeStamp + ".png";
+      var pathAvgSpeed = "avg_speed/avg_speed_" + timeStamp + ".gif";
+      var pathSnowDepth = "snow_depth/snow_depth_" + timeStamp + ".png";
+
+      ///////////////////////////////////////////////
+      // Load Sources
+
+      // map.addSource(('windSource' + frameCountLoader), {
+      //   type: 'image',
+      //   //url: 'mapbox://fredshone1.d9hsoo69',
+      //   url: 'http://0.0.0.0:8000/data/' + pathWind,
+      //   "coordinates": [
+      //     [-12, 59],
+      //     [6, 59],
+      //     [6, 48],
+      //     [-12, 48]
+      //   ]
+      // });
+
+      map.addSource(('avgSpeedSource' + frameCountLoader), {
+        type: 'image',
+        //url: 'mapbox://fredshone1.d9hsoo69',
+        url: 'http://0.0.0.0:8000/data/' + pathAvgSpeed,
+        "coordinates": [
+          [-3.3769946221144571, 53.8242256498865714],
+                   [1.1630053778855429, 53.8242256498865714],
+                   [1.1630053778855429, 50.8142256498865734],
+                   [-3.3769946221144571, 50.8142256498865734]
+        ]
+      });
+
+      map.addSource(('airTempSource' + frameCountLoader), {
+        type: 'image',
+        //url: 'mapbox://fredshone1.d9hsoo69',
+        url: 'http://0.0.0.0:8000/data/' + pathAirTemp,
+        "coordinates": [
+          [-12, 59],
+          [6, 59],
+          [6, 48],
+          [-12, 48]
+        ]
+      });
+
+      map.addSource(('snowDepthSource' + frameCountLoader), {
+        type: 'image',
+        //url: 'mapbox://fredshone1.d9hsoo69',
+        url: 'http://0.0.0.0:8000/data/' + pathSnowDepth,
+        "coordinates": [
+          [-12, 59],
+          [6, 59],
+          [6, 48],
+          [-12, 48]
+        ]
+      });
+
+      // map.addSource(('visibilitySource' + frameCountLoader), {
+      //   type: 'image',
+      //   //url: 'mapbox://fredshone1.d9hsoo69',
+      //   url: 'http://0.0.0.0:8000/data/' + pathVisbility,
+      //   "coordinates": [
+      //     [-12, 59],
+      //     [6, 59],
+      //     [6, 48],
+      //     [-12, 48]
+      //   ]
+      // });
+
+      ///////////////////////////////////////////////
+      // Load Layers
+      // map.addLayer({
+      //   id: ('visibilityLayer' + frameCountLoader),
+      //   type: 'raster',
+      //   source: 'visibilitySource' + frameCountLoader,
+      //   type: 'raster',
+      //   paint: {
+      //         'raster-opacity': 0,
+      //         'raster-opacity-transition': {
+      //             duration: 0
+      //         }
+      //     }
+      // }, firstSymbolId);
+
+      map.addLayer({
+        id: ('snowDepthLayer' + frameCountLoader),
+        type: 'raster',
+        source: 'snowDepthSource' + frameCountLoader,
+        type: 'raster',
+        paint: {
+              'raster-opacity': 0,
+              'raster-opacity-transition': {
+                  duration: 0
+              }
+          }
+      }, firstSymbolId);
+
+      map.addLayer({
+        id: ('avgSpeedLayer' + frameCountLoader),
+        type: 'raster',
+        source: 'avgSpeedSource' + frameCountLoader,
+        type: 'raster',
+        paint: {
+              'raster-opacity': 0,
+              'raster-opacity-transition': {
+                  duration: 0
+              }
+          }
+      }, firstSymbolId);
+
+      map.addLayer({
+        id: ('airTempLayer' + frameCountLoader),
+        type: 'raster',
+        source: 'airTempSource' + frameCountLoader,
+        type: 'raster',
+        paint: {
+              'raster-opacity': 0,
+              'raster-opacity-transition': {
+                  duration: 0
+              }
+          }
+      }, firstSymbolId);
+
+      // map.addLayer({
+      //   id: ('windLayer' + frameCountLoader),
+      //   type: 'raster',
+      //   source: 'windSource' + frameCountLoader,
+      //   type: 'raster',
+      //   paint: {
+      //         'raster-opacity': 0,
+      //         'raster-opacity-transition': {
+      //             duration: 0
+      //         }
+      //     }
+      // }, firstSymbolId);
+
+    console.log("Loaded layer: " + frameCountLoader);
+
+}}} // End loop
+
+///////////////////////////////////////////////
+// Initialise interaction
+var play = true;
+var frameCounter = 3;
+setImage(frameCounter);
+var manualSlide = true;
+
+///////////////////////////////////////////////
+// Slider interaction
+document.querySelector('jqx-slider').addEventListener('change', function(e) {
+  frameCounter = document.querySelector("jqx-slider").getValue();
+  //Add clear layers
+  if (manualSlide) {
+    console.log("Manual Slide - clearing frames");
+    clearImage(frameCounter);
+  }
+  setImage(frameCounter);
+  });
+
+///////////////////////////////////////////////
+// Play interaction
+map.on('click', function() {
+play = !play;
+console.log(play);
+})
+
+setInterval(function() {
+  if (play) {
+    frameCounter = mmod((frameCounter+1),frameCount);
+    manualSlide = false;
+    document.querySelector("jqx-slider").setValue(frameCounter);
+    manualSlide = true;
+    }
+
+}, 250);
+
+});
+
+</script>
+
+</body>
+</html>
