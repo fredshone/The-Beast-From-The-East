@@ -27,11 +27,10 @@ We can only make the code available here. But if you'd like to know where we got
 2. Road Traffic Data (Motorways)
   * Speeds
   * Flow/Volume
-3. Commercial
-  * Footfall
+3. Commercial [CDRC Footfall](https://data.cdrc.ac.uk/dataset/ldc-footfall-sensor-data)
 4. Rail RTPPM archive data from [Network Rail] (https://datafeeds.networkrail.co.uk/ntrod/login)
   * RAG Status
   * Delays
   * Cancellations
   
-![alt text](/2_video/final_vids_long/1_weather/weather_AT_VZ_wind_long.gif "Sample of UK weather")
+![alt text](/2_video/final_vids_long/1_weather/weather_AT_VZ_wind_long.webm "Sample of UK weather")
